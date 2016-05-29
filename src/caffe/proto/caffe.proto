@@ -374,6 +374,7 @@ message LayerParameter {
   optional ELUParameter elu_param = 140;
   optional EmbedParameter embed_param = 137;
   optional ExpParameter exp_param = 111;
+  optional ExtractParameter extract_param = 153;
   optional FlattenParameter flatten_param = 135;
   optional HDF5DataParameter hdf5_data_param = 112;
   optional HDF5OutputParameter hdf5_output_param = 113;
@@ -744,6 +745,14 @@ message ExpParameter {
   optional float base = 1 [default = -1.0];
   optional float scale = 2 [default = 1.0];
   optional float shift = 3 [default = 0.0];
+}
+
+// Message that stores parameters used by ExtractLayer
+message ExtractParameter {
+  optional uint32 x = 1;
+  optional uint32 y = 2;
+  optional uint32 h = 4;
+  optional uint32 w = 3;
 }
 
 /// Message that stores parameters used by FlattenLayer
