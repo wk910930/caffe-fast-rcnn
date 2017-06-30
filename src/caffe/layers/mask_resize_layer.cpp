@@ -3,7 +3,8 @@
 namespace caffe {
 
 template <typename Dtype>
-void MaskResizeLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+void MaskResizeLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+    const vector<Blob<Dtype>*>& top) {
   MaskResizeParameter mask_resize_param = this->layer_param_.mask_resize_param();
   CHECK_GT(mask_resize_param.output_height(), 0);
   CHECK_GT(mask_resize_param.output_width(), 0);
@@ -13,13 +14,15 @@ void MaskResizeLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom, cons
 }
 
 template <typename Dtype>
-void MaskResizeLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+void MaskResizeLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
+    const vector<Blob<Dtype>*>& top) {
   input_channels_ = bottom[0]->channels();
   output_channels_ = input_channels_;
   input_height_ = bottom[0]->height();
   input_width_ = bottom[0]->width();
   
-  top[0]->Reshape(bottom[0]->num(), output_channels_, output_height_, output_width_);
+  top[0]->Reshape(bottom[0]->num(), output_channels_,
+      output_height_, output_width_);
 }
 
 template <typename Dtype>
