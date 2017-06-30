@@ -15,9 +15,12 @@ void MaskPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom, const 
   width_ = bottom[0]->width();
   top[0]->Reshape(bottom[0]->num(), channels_, height_, width_);
   
-  CHECK_EQ(bottom[0]->height(), bottom[1]->height()) << "feature map height and mask height must be the same";
-  CHECK_EQ(bottom[0]->width(), bottom[1]->width()) << "feature map width and mask width must be the same";
-  CHECK_EQ(bottom[0]->num(), bottom[1]->num()) << "feature map num and mask num must be the same";
+  CHECK_EQ(bottom[0]->height(), bottom[1]->height())
+      << "feature map height and mask height must be the same";
+  CHECK_EQ(bottom[0]->width(), bottom[1]->width())
+      << "feature map width and mask width must be the same";
+  CHECK_EQ(bottom[0]->num(), bottom[1]->num())
+      << "feature map num and mask num must be the same";
 }
 
 template <typename Dtype>
