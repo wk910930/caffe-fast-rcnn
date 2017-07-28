@@ -394,7 +394,7 @@ message LayerParameter {
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
   optional PReLUParameter prelu_param = 131;
-  optional PSROIPoolingParameter psroi_pooling_param = 158;
+  optional PSROIPoolingParameter psroi_pooling_param = 159;
   optional PythonParameter python_param = 130;
   optional ReductionParameter reduction_param = 136;
   optional ReLUParameter relu_param = 123;
