@@ -25,6 +25,10 @@ template <typename Dtype>
 void ROIAlignPoolingLayer<Dtype>::Reshape(
     const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
+  CHECK_EQ(bottom[1]->channels(), 5)
+      << "roi input shape should be (R, 5) or (R, 5, 1, 1)";
+  CHECK_EQ(bottom[1]->num() * bottom[1]->channels(), bottom[1]->count())
+      << "roi input shape should be (R, 5) or (R, 5, 1, 1)";
   channels_ = bottom[0]->channels();
   height_ = bottom[0]->height();
   width_ = bottom[0]->width();

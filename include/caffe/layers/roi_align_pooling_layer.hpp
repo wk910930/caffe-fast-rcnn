@@ -22,9 +22,16 @@ class ROIAlignPoolingLayer : public Layer<Dtype> {
   virtual inline const char* type() const { return "ROIAlignPooling"; }
 
   virtual inline int MinBottomBlobs() const { return 2; }
-  virtual inline int MaxBottomBlobs() const { return 4; }
+  virtual inline int MaxBottomBlobs() const { return 2; }
   virtual inline int MinTopBlobs() const { return 1; }
   virtual inline int MaxTopBlobs() const { return 1; }
+  /**
+ * ROIAlignPoolingLayer can only back propagate to bottom[0] (feature map),
+ * but cannot back propagate to bottom[1] (roi list).
+ */
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return (bottom_index == 0);
+  }
 
  protected:
   virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -39,13 +46,10 @@ class ROIAlignPoolingLayer : public Layer<Dtype> {
   int channels_;
   int height_;
   int width_;
-
   int pooled_height_;
   int pooled_width_;
   Dtype spatial_scale_;
   int sample_num_;
-
-  Blob<Dtype> max_idx_;
   Blob<Dtype> argmax_pos_;
 };
 
