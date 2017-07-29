@@ -36,9 +36,9 @@ void PSROIPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       << "roi input shape should be (R, 5) or (R, 5, 1, 1)";
   CHECK_EQ(bottom[1]->num() * bottom[1]->channels(), bottom[1]->count())
       << "roi input shape should be (R, 5) or (R, 5, 1, 1)";
+  channels_ = bottom[0]->channels();
   CHECK_EQ(channels_, output_dim_ * group_size_ * group_size_)
       << "input channel number does not match layer parameters";
-  channels_ = bottom[0]->channels();
   height_ = bottom[0]->height();
   width_ = bottom[0]->width();
   top[0]->Reshape(bottom[1]->num(), output_dim_,
