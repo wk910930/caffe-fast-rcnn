@@ -12,17 +12,11 @@ __device__ void bilinear_interpolate(
     const Dtype* bottom_data,
     const int height, const int width,
     Dtype h, Dtype w,
-    Dtype& maxval, Dtype& maxidx_h, Dtype& maxidx_w) {
-  // Deal with cases that elements are out of feature map boundary
-  if (h < -Dtype(0.5) || h > height - Dtype(0.5) ||
-      w < -Dtype(0.5) || w > width - Dtype(0.5)) {
-    return;
-  }
-
-  if (h <= 0) {
+    Dtype* maxval, Dtype* maxidx_h, Dtype* maxidx_w) {
+  if (h < Dtype(0.5)) {
     h = Dtype(0.);
   }
-  if (w <= 0) {
+  if (w < Dtype(0.5)) {
     w = Dtype(0.);
   }
   int h_low = static_cast<int>(h);
@@ -63,10 +57,10 @@ __device__ void bilinear_interpolate(
 
   // Do bilinear interpolation
   Dtype val = (w1 * v1 + w2 * v2 + w3 * v3 + w4 * v4);
-  if (val > maxval) {
-    maxval = val;
-    maxidx_h = h;
-    maxidx_w = w;
+  if (val > *maxval) {
+    *maxval = val;
+    *maxidx_h = h;
+    *maxidx_w = w;
   }
 }
 
@@ -99,17 +93,21 @@ __global__ void ROIAlignPoolForward(
     Dtype bin_size_w = roi_width / static_cast<Dtype>(pooled_width);
 
     // Add roi offsets and clip to input boundaries
-    Dtype hstart = min(max(ph * bin_size_h + roi_start_h, Dtype(0.)), Dtype(height));
-    Dtype hend = min(max((ph + 1) * bin_size_h + roi_start_h, Dtype(0.)), Dtype(height));
-    Dtype wstart = min(max(pw * bin_size_w + roi_start_w, Dtype(0.)), Dtype(width));
-    Dtype wend = min(max((pw + 1) * bin_size_w + roi_start_w, Dtype(0.)), Dtype(width));
+    Dtype hstart = min(max(
+          ph * bin_size_h + roi_start_h, Dtype(0.)), Dtype(height));
+    Dtype hend = min(max(
+          (ph + 1) * bin_size_h + roi_start_h, Dtype(0.)), Dtype(height));
+    Dtype wstart = min(max(
+          pw * bin_size_w + roi_start_w, Dtype(0.)), Dtype(width));
+    Dtype wend = min(max(
+          (pw + 1) * bin_size_w + roi_start_w, Dtype(0.)), Dtype(width));
     bool is_empty = (hend <= hstart) || (wend <= wstart);
 
     // Define an empty pooling region to be zero
     Dtype maxval = is_empty ? 0 : -FLT_MAX;
     bool updated = false;
-    Dtype argmax_h = Dtype(-1.);
-    Dtype argmax_w = Dtype(-1.);
+    Dtype argmax_h = -FLT_MAX / 2;
+    Dtype argmax_w = -FLT_MAX / 2;
     Dtype sample_h = bin_size_h / (sample_num + 1);
     Dtype sample_w = bin_size_w / (sample_num + 1);
 
@@ -118,12 +116,14 @@ __global__ void ROIAlignPoolForward(
       for (int j = 1; j <= sample_num; ++j) {
         Dtype cur_h = hstart + i * sample_h;
         Dtype cur_w = wstart + j * sample_w;
-        if (cur_h >= hend || cur_w >= wend) {
+        // Skip elements that are out of feature map boundary
+        if (cur_h < -Dtype(0.5) || cur_h >= hend ||
+            cur_w < -Dtype(0.5) || cur_w >= wend) {
           continue;
         }
         bilinear_interpolate(bottom_data,
             height, width, cur_h, cur_w,
-            maxval, argmax_h, argmax_w);
+            &maxval, &argmax_h, &argmax_w);
         updated = true;
       }
     }
@@ -176,11 +176,11 @@ __global__ void ROIAlignPoolBackward(
         continue;
       }
 
-    // Use x/16 instead of [x/16]
-    Dtype roi_start_w = offset_bottom_rois[1] * spatial_scale;
-    Dtype roi_start_h = offset_bottom_rois[2] * spatial_scale;
-    Dtype roi_end_w = offset_bottom_rois[3] * spatial_scale;
-    Dtype roi_end_h = offset_bottom_rois[4] * spatial_scale;
+      // Use x/16 instead of [x/16]
+      Dtype roi_start_w = offset_bottom_rois[1] * spatial_scale;
+      Dtype roi_start_h = offset_bottom_rois[2] * spatial_scale;
+      Dtype roi_end_w = offset_bottom_rois[3] * spatial_scale;
+      Dtype roi_end_h = offset_bottom_rois[4] * spatial_scale;
 
       // Skip if ROI doesn't include (h, w)
       const bool in_roi = (Dtype(w) >= roi_start_w && Dtype(w) <= roi_end_w &&
