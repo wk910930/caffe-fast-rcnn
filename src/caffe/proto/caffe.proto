@@ -376,6 +376,7 @@ message LayerParameter {
   optional ExpParameter exp_param = 111;
   optional ExtractParameter extract_param = 153;
   optional FlattenParameter flatten_param = 135;
+  optional FocalLossParameter focal_loss_param = 161;
   optional HDF5DataParameter hdf5_data_param = 112;
   optional HDF5OutputParameter hdf5_output_param = 113;
   optional HingeLossParameter hinge_loss_param = 114;
@@ -772,6 +773,18 @@ message FlattenParameter {
   // May be negative to index from the end (e.g., the default -1 for the last
   // axis).
   optional int32 end_axis = 2 [default = -1];
+}
+
+message FocalLossParameter {
+  enum Type {
+    ORIGIN = 0;
+    LINEAR = 1;
+  }
+  optional Type type   = 1 [default = ORIGIN];
+  optional float gamma = 2 [default = 2];
+  // cross-categories weights to solve the imbalance problem
+  optional float alpha = 3 [default = 0.25];
+  optional float beta  = 4 [default = 1.0];
 }
 
 // Message that stores parameters used by HDF5DataLayer
