@@ -1,3 +1,34 @@
+# caffe-fast-rcnn
+
+### How to Install
+
+
+#### Build Open MPI
+
+```shell
+# Download
+wget https://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.7.tar.gz
+tar xvf openmpi-1.10.7.tar.gz
+cd openmpi-1.10.7
+
+# Configure
+./autogen.sh
+./configure --with-cuda --with-threads=posix --enable-mpi-thread-multiple --prefix=/usr/local/openmpi-1.10.7
+
+# Build
+make -j
+sudo make install
+```
+
+#### Build Caffe
+
+```shell
+cmake .. -DUSE_MPI=ON -DMPI_CXX_COMPILER=/usr/local/openmpi-1.10.7/bin/mpicxx -DMPI_C_COMPILER=/usr/local/openmpi-1.10.7/bin/mpicc -DCUDNN_INCLUDE=/path/to/cuDNN_v5/include -DCUDNN_LIBRARY=/path/to/cuDNN_v5/lib64/libcudnn.so.5
+```
+
+----
+Following is the original README of Xiong's Caffe.
+
 # Action Recognition with Deep Learning
 
 [![Build Status](https://travis-ci.org/yjxiong/caffe.svg?branch=action_recog)](https://travis-ci.org/yjxiong/caffe)
