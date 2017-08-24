@@ -95,6 +95,10 @@ void Caffe::set_random_seed(const unsigned int seed) {
   Get().random_generator_.reset(new RNG(seed));
 }
 
+void Caffe::SetParallel() {
+  NO_GPU;
+}
+
 void Caffe::SetDevice(const int device_id) {
   NO_GPU;
 }
@@ -182,6 +186,27 @@ void Caffe::set_random_seed(const unsigned int seed) {
   }
   // RNG seed
   Get().random_generator_.reset(new RNG(seed));
+}
+
+void Caffe::SetParallel() {
+  #ifdef USE_MPI
+  Caffe::MPI_build_rank();
+
+  if (Caffe::MPI_all_rank() > 1) {
+    Caffe::set_parallel_mode(Caffe::MPI);
+    LOG(INFO)<<"Running parallel training with MPI support!";
+  }else{
+    Caffe::set_parallel_mode(Caffe::NO);
+    LOG(INFO)<<"You are running caffe compiled with MPI support. Now it's running in non-parallel model";
+  }
+
+  //disable slave processes from logging to stderr
+  //also enable logging only events above ERROR level to logfile.
+  if (Caffe::MPI_my_rank() != 0){
+    FLAGS_logtostderr = false;
+    FLAGS_minloglevel = 2;
+  }
+  #endif
 }
 
 void Caffe::SetDevice(const int device_id) {

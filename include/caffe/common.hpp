@@ -167,6 +167,7 @@ class Caffe {
   inline static void set_mode(Brew mode) { Get().mode_ = mode; }
   // Sets the random seed of both boost and curand
   static void set_random_seed(const unsigned int seed);
+  static void SetParallel();
   // Sets the device. Since we have cublas and curand stuff, set device also
   // requires us to reset those values.
   static void SetDevice(const int device_id);
