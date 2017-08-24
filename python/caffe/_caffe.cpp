@@ -48,7 +48,6 @@ const int NPY_DTYPE = NPY_FLOAT32;
 // Selecting mode.
 void set_mode_cpu() { Caffe::set_mode(Caffe::CPU); }
 void set_mode_gpu() { Caffe::set_mode(Caffe::GPU); }
-void set_logging_disabled() { Caffe::set_logging(false);}
 
 // For convenience, check that input files can be opened, and raise an
 // exception that boost will send to Python if not (caffe could still crash
@@ -213,7 +212,12 @@ BOOST_PYTHON_MODULE(_caffe) {
   bp::def("set_mode_cpu", &set_mode_cpu);
   bp::def("set_mode_gpu", &set_mode_gpu);
   bp::def("set_device", &Caffe::SetDevice);
-  bp::def("set_logging_disabled", &set_logging_disabled);
+  bp::def("set_random_seed", &Caffe::set_random_seed);
+
+  bp::enum_<Phase>("Phase")
+      .value("TRAIN", caffe::TRAIN)
+      .value("TEST", caffe::TEST)
+      .export_values();
 
   bp::class_<Net<Dtype>, shared_ptr<Net<Dtype> >, boost::noncopyable >("Net",
     bp::no_init)
@@ -265,6 +269,7 @@ BOOST_PYTHON_MODULE(_caffe) {
           bp::return_internal_reference<>()))
     .def("setup", &Layer<Dtype>::LayerSetUp)
     .def("reshape", &Layer<Dtype>::Reshape)
+    .add_property("phase", bp::make_function(&Layer<Dtype>::phase))
     .add_property("type", bp::make_function(&Layer<Dtype>::type));
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Layer<Dtype>);
 

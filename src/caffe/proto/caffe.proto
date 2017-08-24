@@ -207,9 +207,8 @@ message SolverParameter {
   // If false, don't save a snapshot after training finishes.
   optional bool snapshot_after_train = 28 [default = true];
 
-  // max memory space that can be used for cuDNN convolution workspace
-  // default to 300, which means 300MB
-  // 0 means infinite
+  // Total memory allowed to be used for workspaces in cudnn's convolution, in MBs. default is 300MB.
+  // The framework will try to find the fastest setup given this limit.
   optional int32 richness = 37 [default = 300];
 }
 
@@ -352,6 +351,7 @@ message LayerParameter {
   optional PReLUParameter prelu_param = 131;
   optional PythonParameter python_param = 130;
   optional ReductionParameter reduction_param = 136;
+  optional ROIPoolingParameter roi_pooling_param = 201;
   optional ReLUParameter relu_param = 123;
   optional ReshapeParameter reshape_param = 133;
   optional SegDataParameter seg_data_param = 141;
@@ -363,8 +363,8 @@ message LayerParameter {
   optional ThresholdParameter threshold_param = 128;
   optional WindowDataParameter window_data_param = 129;
   optional VideoDataParameter video_data_param = 140;
-  optional ROIPoolingParameter roi_pooling_param = 150;
   optional ScaleParameter scale_param = 160;
+  optional SmoothL1LossParameter smooth_l1_loss_param = 200;
   optional BiasParameter bias_param = 161;
   optional BatchReductionParameter batch_reduction_param = 162;
 }
@@ -948,6 +948,13 @@ message SigmoidParameter {
   optional Engine engine = 1 [default = DEFAULT];
 }
 
+message SmoothL1LossParameter {
+  // SmoothL1Loss(x) =
+  //   0.5 * (sigma * x) ** 2    -- if x < 1.0 / sigma / sigma
+  //   |x| - 0.5 / sigma / sigma -- otherwise
+  optional float sigma = 1 [default = 1];
+}
+
 message SliceParameter {
   // The axis along which to slice -- may be negative to index from the end
   // (e.g., -1 for the last axis).
@@ -1046,8 +1053,12 @@ message ROIPoolingParameter {
   // Multiplicative spatial scale factor to translate ROI coords from their
   // input scale to the scale used when pooling
   optional float spatial_scale = 3 [default = 1];
+  optional PoolMethod pool = 4 [default = MAX]; // The pooling method
+  enum PoolMethod {
+    MAX = 0;
+    AVE = 1;
+  }
 }
-
 
 // DEPRECATED: use LayerParameter.
 message V1LayerParameter {
