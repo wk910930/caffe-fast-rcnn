@@ -776,15 +776,8 @@ message FlattenParameter {
 }
 
 message FocalLossParameter {
-  enum Type {
-    ORIGIN = 0;
-    LINEAR = 1;
-  }
-  optional Type type   = 1 [default = ORIGIN];
-  optional float gamma = 2 [default = 2];
-  // cross-categories weights to solve the imbalance problem
-  optional float alpha = 3 [default = 0.25];
-  optional float beta  = 4 [default = 1.0];
+  optional float alpha = 1 [default = 0.25]; // The scale
+  optional float gamma = 2 [default = 2]; // The exponent
 }
 
 // Message that stores parameters used by HDF5DataLayer
